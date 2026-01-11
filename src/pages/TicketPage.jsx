@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import UserAuth from '../components/Ticket/UserAuth';
 import TicketList from '../components/Ticket/TicketList';
 import TicketView from '../components/Ticket/TicketView';
+import { getPaymentMethodsText } from '../utils/paymentMethods';
 import './TicketPage.css';
 
 const TicketPage = () => {
@@ -26,6 +27,17 @@ const TicketPage = () => {
         const account = JSON.parse(pendingAccount);
         handleCreateTicket(account);
         localStorage.removeItem('pending_ticket_account');
+      }
+
+      // Check for selected ticket ID (from Purchase On-Site)
+      const selectedTicketId = localStorage.getItem('selected_ticket_id');
+      if (selectedTicketId) {
+        const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+        const ticket = tickets.find(t => t.id === selectedTicketId);
+        if (ticket) {
+          setSelectedTicket(ticket);
+        }
+        localStorage.removeItem('selected_ticket_id');
       }
     }
   }, []);
@@ -59,6 +71,8 @@ const TicketPage = () => {
       return;
     }
 
+    const paymentMethodsText = getPaymentMethodsText();
+    
     const newTicket = {
       id: Date.now().toString(),
       accountId: account.id,
@@ -70,7 +84,7 @@ const TicketPage = () => {
       status: 'pending',
       messages: [{
         id: Date.now().toString(),
-        text: `I would like to purchase ${account.name} for $${account.price}. Please provide payment instructions.`,
+        text: `I would like to purchase ${account.name} for $${account.price}.\n\n${paymentMethodsText}`,
         sender: currentUser.id,
         senderName: currentUser.name,
         timestamp: new Date().toISOString(),

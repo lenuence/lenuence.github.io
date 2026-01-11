@@ -8,6 +8,17 @@ const TicketList = ({ currentUser, isAdmin, onSelectTicket }) => {
   useEffect(() => {
     loadTickets();
     
+    // Check for selected ticket ID
+    const selectedTicketId = localStorage.getItem('selected_ticket_id');
+    if (selectedTicketId) {
+      const allTickets = JSON.parse(localStorage.getItem('tickets') || '[]');
+      const ticket = allTickets.find(t => t.id === selectedTicketId);
+      if (ticket) {
+        onSelectTicket(ticket);
+        localStorage.removeItem('selected_ticket_id');
+      }
+    }
+    
     // Listen for ticket updates
     const handleTicketUpdate = () => {
       loadTickets();
@@ -15,7 +26,7 @@ const TicketList = ({ currentUser, isAdmin, onSelectTicket }) => {
     
     window.addEventListener('ticketUpdated', handleTicketUpdate);
     return () => window.removeEventListener('ticketUpdated', handleTicketUpdate);
-  }, [currentUser, isAdmin]);
+  }, [currentUser, isAdmin, onSelectTicket]);
 
   const loadTickets = () => {
     const allTickets = JSON.parse(localStorage.getItem('tickets') || '[]');

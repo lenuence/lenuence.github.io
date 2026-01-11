@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { PAYMENT_METHODS } from '../../utils/paymentMethods';
 import './TicketView.css';
 
 const TicketView = ({ ticket, currentUser, isAdmin, onClose, onUpdateTicket }) => {
@@ -98,19 +99,19 @@ const TicketView = ({ ticket, currentUser, isAdmin, onClose, onUpdateTicket }) =
         <h3>Payment Methods</h3>
         <div className="payment-list">
           <div className="payment-item">
-            <strong>PayPal:</strong> your-paypal@email.com
+            <strong>PayPal:</strong> {PAYMENT_METHODS.paypal}
           </div>
           <div className="payment-item">
-            <strong>Venmo:</strong> @your-venmo
+            <strong>Venmo:</strong> {PAYMENT_METHODS.venmo}
           </div>
           <div className="payment-item">
-            <strong>CashApp:</strong> $your-cashapp
+            <strong>CashApp:</strong> {PAYMENT_METHODS.cashapp}
           </div>
           <div className="payment-item">
-            <strong>Zelle:</strong> your-zelle@email.com
+            <strong>Zelle:</strong> {PAYMENT_METHODS.zelle}
           </div>
           <div className="payment-item">
-            <strong>Crypto (BTC):</strong> bc1q...your-btc-address
+            <strong>Crypto (BTC):</strong> {PAYMENT_METHODS.crypto}
           </div>
         </div>
         <p className="payment-note">

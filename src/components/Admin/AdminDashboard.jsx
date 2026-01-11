@@ -189,6 +189,15 @@ const AdminDashboard = ({ onLogout }) => {
         <div className="admin-header-content">
           <h1 className="admin-title">Admin Dashboard</h1>
           <div className="admin-actions">
+            <button 
+              onClick={() => {
+                window.location.hash = '#tickets';
+                window.dispatchEvent(new CustomEvent('hashchange'));
+              }} 
+              className="admin-button secondary"
+            >
+              View Tickets
+            </button>
             <button onClick={handleExportJSON} className="admin-button secondary">
               Export JSON
             </button>
