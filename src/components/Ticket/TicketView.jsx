@@ -49,6 +49,13 @@ const TicketView = ({ ticket, currentUser, isAdmin, onClose, onUpdateTicket }) =
   };
 
   const handleStatusChange = (status) => {
+    // If customer is cancelling, confirm first
+    if (!isAdmin && status === 'cancelled') {
+      if (!window.confirm('Are you sure you want to cancel this order?')) {
+        return;
+      }
+    }
+
     const updatedTicket = { ...ticket, status, updatedAt: new Date().toISOString() };
     const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
     const index = tickets.findIndex(t => t.id === ticket.id);
@@ -57,6 +64,25 @@ const TicketView = ({ ticket, currentUser, isAdmin, onClose, onUpdateTicket }) =
       localStorage.setItem('tickets', JSON.stringify(tickets));
     }
     onUpdateTicket(updatedTicket);
+    
+    if (!isAdmin && status === 'cancelled') {
+      // Add a message when customer cancels
+      const cancelMessage = {
+        id: Date.now().toString(),
+        text: 'Order cancelled by customer.',
+        sender: currentUser.id,
+        senderName: currentUser.name,
+        timestamp: new Date().toISOString(),
+        isAdmin: false
+      };
+      const updatedTicketWithMessage = {
+        ...updatedTicket,
+        messages: [...updatedTicket.messages, cancelMessage]
+      };
+      tickets[index] = updatedTicketWithMessage;
+      localStorage.setItem('tickets', JSON.stringify(tickets));
+      onUpdateTicket(updatedTicketWithMessage);
+    }
   };
 
   return (
@@ -66,8 +92,8 @@ const TicketView = ({ ticket, currentUser, isAdmin, onClose, onUpdateTicket }) =
           <h2>Ticket #{ticket.id.slice(-6)}</h2>
           <span className={`ticket-status ${ticket.status}`}>{ticket.status}</span>
         </div>
-        {isAdmin && (
-          <div className="ticket-actions">
+        <div className="ticket-actions">
+          {isAdmin ? (
             <select
               value={ticket.status}
               onChange={(e) => handleStatusChange(e.target.value)}
@@ -78,8 +104,17 @@ const TicketView = ({ ticket, currentUser, isAdmin, onClose, onUpdateTicket }) =
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
-          </div>
-        )}
+          ) : (
+            ticket.status !== 'cancelled' && ticket.status !== 'completed' && (
+              <button
+                onClick={() => handleStatusChange('cancelled')}
+                className="cancel-ticket-button"
+              >
+                Cancel Order
+              </button>
+            )
+          )}
+        </div>
         <button onClick={onClose} className="close-button">×</button>
       </div>
 
