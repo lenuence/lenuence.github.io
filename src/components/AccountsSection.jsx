@@ -25,15 +25,21 @@ const AccountsSection = () => {
   }, []);
 
   const loadAccounts = () => {
+    // Load deleted account IDs (accounts to hide from JSON)
+    const deletedIds = JSON.parse(localStorage.getItem('deleted_account_ids') || '[]');
+    
     // Load from localStorage (admin-added accounts)
     const storedAccounts = localStorage.getItem('admin_accounts');
     const adminAccounts = storedAccounts ? JSON.parse(storedAccounts) : [];
     
+    // Filter out deleted JSON accounts
+    const visibleJsonAccounts = accountsData.filter(acc => !deletedIds.includes(acc.id));
+    
     // Combine JSON accounts with admin accounts
     // Admin accounts take precedence (no duplicates based on ID)
-    const combinedAccounts = [...accountsData];
+    const combinedAccounts = [...visibleJsonAccounts];
     
-    // Add admin accounts that aren't already in JSON
+    // Add admin accounts that aren't already in visible JSON accounts
     adminAccounts.forEach(adminAcc => {
       const exists = combinedAccounts.find(acc => acc.id === adminAcc.id);
       if (!exists) {

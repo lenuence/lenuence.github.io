@@ -14,6 +14,9 @@ const AdminDashboard = ({ onLogout }) => {
   }, []);
 
   const loadAccounts = () => {
+    // Load deleted account IDs (accounts to hide from JSON)
+    const deletedIds = JSON.parse(localStorage.getItem('deleted_account_ids') || '[]');
+    
     // Load from localStorage (admin-added accounts)
     const storedAccounts = localStorage.getItem('admin_accounts');
     const adminAccounts = storedAccounts ? JSON.parse(storedAccounts) : [];
@@ -21,14 +24,22 @@ const AdminDashboard = ({ onLogout }) => {
     // Load from JSON (original accounts)
     import('../../data/accounts.json').then((module) => {
       const jsonAccounts = module.default || [];
-      // Combine both, with admin accounts taking precedence (no duplicates)
-      const combinedAccounts = [...jsonAccounts];
       
-      // Add admin accounts that aren't already in JSON
+      // Filter out deleted JSON accounts
+      const visibleJsonAccounts = jsonAccounts.filter(acc => !deletedIds.includes(acc.id));
+      
+      // Combine both, with admin accounts taking precedence (no duplicates)
+      const combinedAccounts = [...visibleJsonAccounts];
+      
+      // Add admin accounts that aren't already in visible JSON accounts
       adminAccounts.forEach(adminAcc => {
         const exists = combinedAccounts.find(acc => acc.id === adminAcc.id);
         if (!exists) {
           combinedAccounts.push(adminAcc);
+        } else {
+          // Update existing account if it's been edited via admin
+          const index = combinedAccounts.findIndex(acc => acc.id === adminAcc.id);
+          combinedAccounts[index] = adminAcc;
         }
       });
       
@@ -95,15 +106,37 @@ const AdminDashboard = ({ onLogout }) => {
       return;
     }
 
-    const storedAccounts = localStorage.getItem('admin_accounts');
-    const adminAccounts = storedAccounts ? JSON.parse(storedAccounts) : [];
-    
-    // Remove from admin accounts
-    const filtered = adminAccounts.filter(a => a.id !== accountId);
-    localStorage.setItem('admin_accounts', JSON.stringify(filtered));
-    
-    loadAccounts();
-    window.dispatchEvent(new CustomEvent('accountsUpdated'));
+    // Load JSON accounts to check if this is a JSON account
+    import('../../data/accounts.json').then((module) => {
+      const jsonAccounts = module.default || [];
+      const isJsonAccount = jsonAccounts.some(acc => acc.id === accountId);
+      
+      if (isJsonAccount) {
+        // For JSON accounts, add to deleted list
+        const deletedIds = JSON.parse(localStorage.getItem('deleted_account_ids') || '[]');
+        if (!deletedIds.includes(accountId)) {
+          deletedIds.push(accountId);
+          localStorage.setItem('deleted_account_ids', JSON.stringify(deletedIds));
+        }
+      } else {
+        // For admin accounts, remove from localStorage
+        const storedAccounts = localStorage.getItem('admin_accounts');
+        const adminAccounts = storedAccounts ? JSON.parse(storedAccounts) : [];
+        const filtered = adminAccounts.filter(a => a.id !== accountId);
+        localStorage.setItem('admin_accounts', JSON.stringify(filtered));
+      }
+      
+      loadAccounts();
+      window.dispatchEvent(new CustomEvent('accountsUpdated'));
+    }).catch(() => {
+      // Fallback: try to remove from admin accounts
+      const storedAccounts = localStorage.getItem('admin_accounts');
+      const adminAccounts = storedAccounts ? JSON.parse(storedAccounts) : [];
+      const filtered = adminAccounts.filter(a => a.id !== accountId);
+      localStorage.setItem('admin_accounts', JSON.stringify(filtered));
+      loadAccounts();
+      window.dispatchEvent(new CustomEvent('accountsUpdated'));
+    });
   };
 
   const handleExportJSON = () => {
@@ -120,14 +153,34 @@ const AdminDashboard = ({ onLogout }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleRestoreDeleted = () => {
+    // Clear the deleted accounts list to restore all JSON accounts
+    localStorage.removeItem('deleted_account_ids');
+    loadAccounts();
+    window.dispatchEvent(new CustomEvent('accountsUpdated'));
+    alert('All deleted accounts have been restored!');
+  };
+
   const handleClearAdminAccounts = () => {
-    if (!window.confirm('Are you sure you want to clear all admin-added accounts? This cannot be undone.')) {
+    if (!window.confirm('Are you sure you want to clear ALL accounts (including original examples)? This will hide all JSON accounts and remove all admin-added accounts. This can be undone by clicking "Restore Deleted".')) {
       return;
     }
     
+    // Clear admin accounts
     localStorage.removeItem('admin_accounts');
-    loadAccounts();
-    window.dispatchEvent(new CustomEvent('accountsUpdated'));
+    
+    // Hide all JSON accounts by adding all their IDs to deleted list
+    import('../../data/accounts.json').then((module) => {
+      const jsonAccounts = module.default || [];
+      const allJsonIds = jsonAccounts.map(acc => acc.id);
+      localStorage.setItem('deleted_account_ids', JSON.stringify(allJsonIds));
+      
+      loadAccounts();
+      window.dispatchEvent(new CustomEvent('accountsUpdated'));
+    }).catch(() => {
+      loadAccounts();
+      window.dispatchEvent(new CustomEvent('accountsUpdated'));
+    });
   };
 
   return (
@@ -138,6 +191,9 @@ const AdminDashboard = ({ onLogout }) => {
           <div className="admin-actions">
             <button onClick={handleExportJSON} className="admin-button secondary">
               Export JSON
+            </button>
+            <button onClick={handleRestoreDeleted} className="admin-button secondary">
+              Restore Deleted
             </button>
             <button onClick={handleClearAdminAccounts} className="admin-button secondary">
               Clear All
