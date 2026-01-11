@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminPage from './pages/AdminPage';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -12,48 +11,48 @@ import ContactSection from './components/ContactSection';
 import './styles/App.css';
 
 function App() {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  // 1. INITIALIZE WITH HASH (e.g., '#/admin' or '')
+  const [currentHash, setCurrentHash] = useState(window.location.hash);
 
   useEffect(() => {
-    // Listen for popstate (back/forward buttons)
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
+    // 2. LISTEN FOR HASH CHANGES ONLY
+    const handleHashChange = () => {
+      // Get the hash (e.g., '#/admin')
+      setCurrentHash(window.location.hash);
     };
 
-    window.addEventListener('popstate', handlePopState);
+    // The 'hashchange' event is key! It doesn't contact the server.
+    window.addEventListener('hashchange', handleHashChange);
     
-    // Listen for custom navigation events
-    const handleNavigation = () => {
-      setCurrentPath(window.location.pathname);
-    };
-
-    window.addEventListener('pushstate', handleNavigation);
-    window.addEventListener('replacestate', handleNavigation);
-
+    // Clean up listener
     return () => {
-      window.removeEventListener('popstate', handlePopState);
-      window.removeEventListener('pushstate', handleNavigation);
-      window.removeEventListener('replacestate', handleNavigation);
+      window.removeEventListener('hashchange', handleHashChange);
     };
   }, []);
 
-  // Check if we're on the admin route
-  if (currentPath === '/admin' || currentPath === '/admin/') {
+  // 3. CHECK AGAINST THE HASH (e.g., '#/admin' or '#/admin/')
+  if (currentHash === '#/admin' || currentHash === '#/admin/') {
     return <AdminPage />;
   }
 
-  return (
-    <div className="app">
-      <Header />
-      <HeroSection />
-      <AboutSection />
-      <FeaturesSection />
-      <AccountsSection />
-      <PricingSection />
-      <TestimonialsSection />
-      <ContactSection />
-    </div>
-  );
+  // Check if the current hash is just empty or '#' (for the homepage)
+  if (currentHash === '' || currentHash === '#') {
+    return (
+      <div className="app">
+        <Header />
+        <HeroSection />
+        <AboutSection />
+        <FeaturesSection />
+        <AccountsSection />
+        <PricingSection />
+        <TestimonialsSection />
+        <ContactSection />
+      </div>
+    );
+  }
+  
+  // Optional: Handle other paths or 404s
+  return <h1>404 - Page Not Found</h1>; 
 }
 
 export default App;
