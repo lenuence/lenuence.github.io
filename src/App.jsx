@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AdminPage from './pages/AdminPage';
+// Import other components...
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
@@ -11,48 +12,44 @@ import ContactSection from './components/ContactSection';
 import './styles/App.css';
 
 function App() {
-  // 1. INITIALIZE WITH HASH (e.g., '#/admin' or '')
+  // CRITICAL FIX: Initialize with the current hash. 
+  // If the URL is bloxvault.site/#/admin, this will be '#/admin'.
   const [currentHash, setCurrentHash] = useState(window.location.hash);
 
   useEffect(() => {
-    // 2. LISTEN FOR HASH CHANGES ONLY
+    // Listener for hash changes. This is client-side and does not contact the server.
     const handleHashChange = () => {
-      // Get the hash (e.g., '#/admin')
       setCurrentHash(window.location.hash);
     };
 
-    // The 'hashchange' event is key! It doesn't contact the server.
     window.addEventListener('hashchange', handleHashChange);
     
-    // Clean up listener
+    // Cleanup the listener
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, []);
+  }, []); // Empty dependency array means this runs only once on mount
 
-  // 3. CHECK AGAINST THE HASH (e.g., '#/admin' or '#/admin/')
+  // CRITICAL CHECK: Look for the specific hash value
+  // We check for '#/admin' and '#/admin/', which HashRouter usually cleans up but manual routing may not.
   if (currentHash === '#/admin' || currentHash === '#/admin/') {
     return <AdminPage />;
   }
-
-  // Check if the current hash is just empty or '#' (for the homepage)
-  if (currentHash === '' || currentHash === '#') {
-    return (
-      <div className="app">
-        <Header />
-        <HeroSection />
-        <AboutSection />
-        <FeaturesSection />
-        <AccountsSection />
-        <PricingSection />
-        <TestimonialsSection />
-        <ContactSection />
-      </div>
-    );
-  }
   
-  // Optional: Handle other paths or 404s
-  return <h1>404 - Page Not Found</h1>; 
+  // If the hash is empty or anything else, render the main site.
+  // This handles URLs like: bloxvault.site, bloxvault.site#, bloxvault.site/#
+  return (
+    <div className="app">
+      <Header />
+      <HeroSection />
+      <AboutSection />
+      <FeaturesSection />
+      <AccountsSection />
+      <PricingSection />
+      <TestimonialsSection />
+      <ContactSection />
+    </div>
+  );
 }
 
 export default App;
