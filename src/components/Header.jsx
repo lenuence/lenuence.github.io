@@ -40,6 +40,17 @@ const Header = () => {
           >
             Eldorado
           </a>
+          <a 
+            href="/admin" 
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = '/admin';
+            }}
+            className="header-action-link admin-link"
+            title="Admin Dashboard"
+          >
+            🔐 Admin
+          </a>
         </div>
       </div>
     </header>

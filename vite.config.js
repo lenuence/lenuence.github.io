@@ -1,17 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  
-  // --- ADD THESE CONFIGURATION PROPERTIES ---
-  // Sets the base path for assets, crucial for GitHub Pages subfolder deployment
-  base: "./", 
-  
-  // Defines the build output configuration
+  // CRITICAL FIX: Use relative paths (./) for assets on GitHub Pages
+  base: './', 
   build: {
-    // Sets the output directory to 'docs' instead of the default 'dist'
-    outDir: 'docs' 
+    // Specify the correct output directory (docs)
+    outDir: 'docs',
   }
-  // ------------------------------------------
-});
+})

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import AdminPage from './pages/AdminPage';
-// Import other components...
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
@@ -11,36 +10,45 @@ import TestimonialsSection from './components/TestimonialsSection';
 import ContactSection from './components/ContactSection';
 import './styles/App.css';
 
-// CRITICAL FIX: CHECK THE HASH BEFORE REACT RENDERS
-const IS_ADMIN_PATH = window.location.hash.toLowerCase().includes('admin');
-
 function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [currentHash, setCurrentHash] = useState(window.location.hash);
 
   useEffect(() => {
-    // Only listen for subsequent hash changes
+    // Listen for pathname changes
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+      setCurrentHash(window.location.hash);
+    };
+
+    // Listen for hash changes
     const handleHashChange = () => {
       setCurrentHash(window.location.hash);
     };
 
+    window.addEventListener('popstate', handlePopState);
     window.addEventListener('hashchange', handleHashChange);
-    
+
+    // Check initial path/hash
+    setCurrentPath(window.location.pathname);
+    setCurrentHash(window.location.hash);
+
     return () => {
+      window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, []);
 
-  // 1. Check the hardcoded pre-render variable
-  if (IS_ADMIN_PATH) {
+  // Check if we're on the admin route (path or hash)
+  const isAdminRoute = currentPath === '/admin' || 
+                       currentPath === '/admin/' || 
+                       currentHash === '#admin' ||
+                       currentHash.toLowerCase().includes('admin');
+
+  if (isAdminRoute) {
     return <AdminPage />;
   }
 
-  // 2. Check the state (for internal navigation)
-  if (currentHash.toLowerCase().includes('admin')) {
-    return <AdminPage />;
-  }
-  
-  // Default to main site
   return (
     <div className="app">
       <Header />
