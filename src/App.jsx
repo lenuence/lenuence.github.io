@@ -1,10 +1,24 @@
-// ... (all imports and other code above this line are the same)
+import { useEffect, useState } from 'react';
+import AdminPage from './pages/AdminPage';
+// Import other components...
+import Header from './components/Header';
+import HeroSection from './components/HeroSection';
+import AboutSection from './components/AboutSection';
+import FeaturesSection from './components/FeaturesSection';
+import AccountsSection from './components/AccountsSection';
+import PricingSection from './components/PricingSection';
+import TestimonialsSection from './components/TestimonialsSection';
+import ContactSection from './components/ContactSection';
+import './styles/App.css';
+
+// CRITICAL FIX: CHECK THE HASH BEFORE REACT RENDERS
+const IS_ADMIN_PATH = window.location.hash.toLowerCase().includes('admin');
 
 function App() {
   const [currentHash, setCurrentHash] = useState(window.location.hash);
 
   useEffect(() => {
-    // Listener remains simple and correct
+    // Only listen for subsequent hash changes
     const handleHashChange = () => {
       setCurrentHash(window.location.hash);
     };
@@ -16,22 +30,27 @@ function App() {
     };
   }, []);
 
-  // CRITICAL FIX: Direct Check on window.location.hash for reliability
-  // If the browser hash contains the admin path, render the AdminPage immediately.
-  // This is the most reliable way to check the hash on a deployed static site.
-  if (window.location.hash.includes('admin')) {
+  // 1. Check the hardcoded pre-render variable
+  if (IS_ADMIN_PATH) {
     return <AdminPage />;
   }
 
-  // Fallback to state check (for when navigation happens after the initial load)
-  if (currentHash.includes('admin')) {
+  // 2. Check the state (for internal navigation)
+  if (currentHash.toLowerCase().includes('admin')) {
     return <AdminPage />;
   }
   
-  // If no admin path is found, render the main site.
+  // Default to main site
   return (
     <div className="app">
-      {/* ... (render all main site components) ... */}
+      <Header />
+      <HeroSection />
+      <AboutSection />
+      <FeaturesSection />
+      <AccountsSection />
+      <PricingSection />
+      <TestimonialsSection />
+      <ContactSection />
     </div>
   );
 }
