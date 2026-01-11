@@ -75,16 +75,11 @@ const AccountCard = ({ account, index }) => {
           <div className="card-items">
             <span className="items-label">Featured Items:</span>
             <div className="items-list">
-              {account.items.slice(0, 3).map((item, idx) => (
+              {account.items.map((item, idx) => (
                 <span key={idx} className="item-tag">
                   {item}
                 </span>
               ))}
-              {account.items.length > 3 && (
-                <span className="item-tag more">
-                  +{account.items.length - 3} more
-                </span>
-              )}
             </div>
           </div>
         )}
@@ -93,6 +88,7 @@ const AccountCard = ({ account, index }) => {
           <PurchaseButton
             discordLink={account.discordLink}
             eldoradoLink={account.eldoradoLink}
+            account={account}
           />
         </div>
       </div>

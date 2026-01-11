@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './PurchaseButton.css';
 
-const PurchaseButton = ({ discordLink, eldoradoLink }) => {
+const PurchaseButton = ({ discordLink, eldoradoLink, account }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -30,6 +30,16 @@ const PurchaseButton = ({ discordLink, eldoradoLink }) => {
   const handleEldoradoClick = () => {
     window.open(eldoradoLink, '_blank', 'noopener,noreferrer');
     setIsOpen(false);
+  };
+
+  const handleOnSiteClick = () => {
+    setIsOpen(false);
+    // Store account info and redirect to tickets page
+    localStorage.setItem('pending_ticket_account', JSON.stringify(account));
+    // Use hash routing for GitHub Pages compatibility
+    window.location.hash = '#tickets';
+    // Trigger a custom event to update the app
+    window.dispatchEvent(new CustomEvent('hashchange'));
   };
 
   return (
@@ -72,6 +82,13 @@ const PurchaseButton = ({ discordLink, eldoradoLink }) => {
             >
               <span className="option-icon">🛒</span>
               Purchase via Eldorado
+            </button>
+            <button
+              className="dropdown-option"
+              onClick={handleOnSiteClick}
+            >
+              <span className="option-icon">💳</span>
+              Purchase On-Site
             </button>
           </motion.div>
         )}

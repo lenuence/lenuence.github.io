@@ -6,8 +6,17 @@ import './AccountsSection.css';
 
 const AccountsSection = () => {
   const [accounts, setAccounts] = useState([]);
+  const [filteredAccounts, setFilteredAccounts] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'basic', 'premium', 'elite'
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+
+  const priceFilters = {
+    all: { min: 0, max: Infinity, label: 'All Accounts' },
+    basic: { min: 1, max: 10, label: 'Basic ($1-10)' },
+    premium: { min: 10, max: 30, label: 'Premium ($10-30)' },
+    elite: { min: 30, max: Infinity, label: 'Elite ($30+)' }
+  };
 
   useEffect(() => {
     loadAccounts();
@@ -17,12 +26,24 @@ const AccountsSection = () => {
       loadAccounts();
     };
 
+    // Listen for filter changes from pricing section
+    const handleFilterChange = (e) => {
+      const filter = e.detail.filter;
+      setActiveFilter(filter);
+    };
+
     window.addEventListener('accountsUpdated', handleAccountsUpdate);
+    window.addEventListener('filterAccounts', handleFilterChange);
 
     return () => {
       window.removeEventListener('accountsUpdated', handleAccountsUpdate);
+      window.removeEventListener('filterAccounts', handleFilterChange);
     };
   }, []);
+
+  useEffect(() => {
+    applyFilter();
+  }, [accounts, activeFilter]);
 
   const loadAccounts = () => {
     // Load deleted account IDs (accounts to hide from JSON)
@@ -54,6 +75,15 @@ const AccountsSection = () => {
     setAccounts(combinedAccounts);
   };
 
+  const applyFilter = () => {
+    const filter = priceFilters[activeFilter];
+    const filtered = accounts.filter(account => {
+      const price = parseFloat(account.price) || 0;
+      return price >= filter.min && price <= filter.max;
+    });
+    setFilteredAccounts(filtered);
+  };
+
   return (
     <section id="accounts" className="accounts-section" ref={ref}>
       <div className="container">
@@ -65,11 +95,29 @@ const AccountsSection = () => {
           <h2 className="section-title">Available Accounts</h2>
           <p className="section-subtitle">Browse our collection of premium gaming accounts</p>
           
-          <div className="accounts-grid">
-            {accounts.map((account, index) => (
-              <AccountCard key={account.id} account={account} index={index} />
+          <div className="filter-buttons">
+            {Object.entries(priceFilters).map(([key, filter]) => (
+              <button
+                key={key}
+                className={`filter-button ${activeFilter === key ? 'active' : ''}`}
+                onClick={() => setActiveFilter(key)}
+              >
+                {filter.label}
+              </button>
             ))}
           </div>
+          
+          {filteredAccounts.length === 0 ? (
+            <div className="no-accounts">
+              <p>No accounts found in this price range.</p>
+            </div>
+          ) : (
+            <div className="accounts-grid">
+              {filteredAccounts.map((account, index) => (
+                <AccountCard key={account.id} account={account} index={index} />
+              ))}
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

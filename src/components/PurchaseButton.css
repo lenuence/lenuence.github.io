@@ -64,7 +64,7 @@
   background-color: #334155;
 }
 
-.dropdown-option:first-child {
+.dropdown-option:not(:last-child) {
   border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 

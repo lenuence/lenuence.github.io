@@ -134,11 +134,12 @@ const AccountForm = ({ account, onSubmit, onCancel }) => {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Describe the account..."
-              rows="3"
+              placeholder="Describe the account... (Use line breaks for formatting)"
+              rows="10"
               className={errors.description ? 'error' : ''}
             />
             {errors.description && <span className="error-text">{errors.description}</span>}
+            <small className="form-hint">Press Enter for line breaks. Format: LVL 2800 | 42M+ BELI (new line) RACE: HUMAN V3</small>
           </div>
 
           <div className="form-row">
