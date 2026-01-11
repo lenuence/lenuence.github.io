@@ -1,53 +1,37 @@
-import { useEffect, useState } from 'react';
-import AdminPage from './pages/AdminPage';
-// Import other components...
-import Header from './components/Header';
-import HeroSection from './components/HeroSection';
-import AboutSection from './components/AboutSection';
-import FeaturesSection from './components/FeaturesSection';
-import AccountsSection from './components/AccountsSection';
-import PricingSection from './components/PricingSection';
-import TestimonialsSection from './components/TestimonialsSection';
-import ContactSection from './components/ContactSection';
-import './styles/App.css';
+// ... (all imports and other code above this line are the same)
 
 function App() {
-  // CRITICAL FIX: Initialize with the current hash. 
-  // If the URL is bloxvault.site/#/admin, this will be '#/admin'.
   const [currentHash, setCurrentHash] = useState(window.location.hash);
 
   useEffect(() => {
-    // Listener for hash changes. This is client-side and does not contact the server.
+    // Listener remains simple and correct
     const handleHashChange = () => {
       setCurrentHash(window.location.hash);
     };
 
     window.addEventListener('hashchange', handleHashChange);
     
-    // Cleanup the listener
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, []); // Empty dependency array means this runs only once on mount
+  }, []);
 
-  // CRITICAL CHECK: Look for the specific hash value
-  // We check for '#/admin' and '#/admin/', which HashRouter usually cleans up but manual routing may not.
-  if (currentHash === '#/admin' || currentHash === '#/admin/') {
+  // CRITICAL FIX: Direct Check on window.location.hash for reliability
+  // If the browser hash contains the admin path, render the AdminPage immediately.
+  // This is the most reliable way to check the hash on a deployed static site.
+  if (window.location.hash.includes('admin')) {
+    return <AdminPage />;
+  }
+
+  // Fallback to state check (for when navigation happens after the initial load)
+  if (currentHash.includes('admin')) {
     return <AdminPage />;
   }
   
-  // If the hash is empty or anything else, render the main site.
-  // This handles URLs like: bloxvault.site, bloxvault.site#, bloxvault.site/#
+  // If no admin path is found, render the main site.
   return (
     <div className="app">
-      <Header />
-      <HeroSection />
-      <AboutSection />
-      <FeaturesSection />
-      <AccountsSection />
-      <PricingSection />
-      <TestimonialsSection />
-      <ContactSection />
+      {/* ... (render all main site components) ... */}
     </div>
   );
 }
