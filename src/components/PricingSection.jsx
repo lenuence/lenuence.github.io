@@ -85,9 +85,6 @@ const PricingSection = () => {
                   href="#accounts"
                   onClick={(e) => {
                     e.preventDefault();
-                    const filterMap = { 'Basic': 'basic', 'Premium': 'premium', 'Elite': 'elite' };
-                    const filter = filterMap[tier.name] || 'all';
-                    window.dispatchEvent(new CustomEvent('filterAccounts', { detail: { filter } }));
                     document.getElementById('accounts')?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="pricing-button"

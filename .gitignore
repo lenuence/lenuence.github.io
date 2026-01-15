@@ -12,10 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Build output - docs folder should be committed for GitHub Pages
-# Uncomment the line below if you don't want to commit docs folder
-# docs
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

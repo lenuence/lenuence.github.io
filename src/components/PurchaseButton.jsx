@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getPaymentMethodsText } from '../utils/paymentMethods';
 import './PurchaseButton.css';
 
-const PurchaseButton = ({ discordLink, eldoradoLink, account }) => {
+const PurchaseButton = ({ discordLink, eldoradoLink }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -31,63 +30,6 @@ const PurchaseButton = ({ discordLink, eldoradoLink, account }) => {
   const handleEldoradoClick = () => {
     window.open(eldoradoLink, '_blank', 'noopener,noreferrer');
     setIsOpen(false);
-  };
-
-  const handleOnSiteClick = () => {
-    setIsOpen(false);
-    
-    // Check if user is logged in
-    const currentUser = localStorage.getItem('current_user');
-    
-    if (!currentUser) {
-      // Store account info and redirect to login
-      localStorage.setItem('pending_ticket_account', JSON.stringify(account));
-      window.location.hash = '#tickets';
-      window.dispatchEvent(new CustomEvent('hashchange'));
-      return;
-    }
-
-    // User is logged in - create ticket immediately
-    const user = JSON.parse(currentUser);
-    const paymentMethodsText = getPaymentMethodsText();
-    
-    const ticketId = Date.now().toString();
-    const newTicket = {
-      id: ticketId,
-      accountId: account.id,
-      accountName: account.name,
-      accountPrice: account.price,
-      customerId: user.id,
-      customerName: user.name,
-      customerEmail: user.email,
-      status: 'pending',
-      messages: [
-        {
-          id: Date.now().toString(),
-          text: `I would like to purchase ${account.name} for $${account.price}.\n\n${paymentMethodsText}`,
-          sender: user.id,
-          senderName: user.name,
-          timestamp: new Date().toISOString(),
-          isAdmin: false
-        }
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-    tickets.push(newTicket);
-    localStorage.setItem('tickets', JSON.stringify(tickets));
-    
-    // Store ticket ID to auto-select it
-    localStorage.setItem('selected_ticket_id', ticketId);
-    
-    window.dispatchEvent(new CustomEvent('ticketUpdated'));
-    
-    // Redirect to tickets page and auto-select the ticket
-    window.location.hash = '#tickets';
-    // Trigger hashchange to update the app
-    window.dispatchEvent(new Event('hashchange'));
   };
 
   return (
@@ -130,13 +72,6 @@ const PurchaseButton = ({ discordLink, eldoradoLink, account }) => {
             >
               <span className="option-icon">🛒</span>
               Purchase via Eldorado
-            </button>
-            <button
-              className="dropdown-option"
-              onClick={handleOnSiteClick}
-            >
-              <span className="option-icon">💳</span>
-              Purchase On-Site
             </button>
           </motion.div>
         )}

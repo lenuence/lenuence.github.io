@@ -78,12 +78,14 @@ const AccountList = ({ accounts, onEdit, onDelete }) => {
                 >
                   ✏️ Edit
                 </button>
-                <button
-                  onClick={() => onDelete(account.id)}
-                  className="action-button delete"
-                >
-                  🗑️ Delete
-                </button>
+                {adminAccountIds.includes(account.id) && (
+                  <button
+                    onClick={() => onDelete(account.id)}
+                    className="action-button delete"
+                  >
+                    🗑️ Delete
+                  </button>
+                )}
               </div>
             </motion.div>
           ))}

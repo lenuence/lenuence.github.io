@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import AdminPage from './pages/AdminPage';
-import TicketPage from './pages/TicketPage';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
@@ -46,18 +45,8 @@ function App() {
                        currentHash === '#admin' ||
                        currentHash.toLowerCase().includes('admin');
 
-  // Check if we're on the tickets route
-  const isTicketRoute = currentPath === '/tickets' || 
-                        currentPath === '/tickets/' || 
-                        currentHash === '#tickets' ||
-                        currentHash.toLowerCase().includes('tickets');
-
   if (isAdminRoute) {
     return <AdminPage />;
-  }
-
-  if (isTicketRoute) {
-    return <TicketPage />;
   }
 
   return (
